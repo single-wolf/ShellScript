@@ -8,8 +8,8 @@
 #below is a simple ,you should change ruser(adviced not be root) ,remote-host and remote-port
 
 #no passwd login setting
-ssh-keygen -t -rsa -P ""
-if [find ~/.ssh/id_rsa.pub];then
+ssh-keygen -t rsa -P ""
+if [ ! -f ~/.ssh/id_rsa.pub ];then
 echo "Error to generate the host file"
 exit 0
 fi
