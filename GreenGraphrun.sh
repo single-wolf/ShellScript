@@ -21,5 +21,5 @@ git add -A && git commit -m "$(($commitTimes+1))"
 i=$(($i+1))
 done
 git push origin master
-pkill -9 ssh-agent
+sudo pkill -8 ssh-agent
 cd ~
