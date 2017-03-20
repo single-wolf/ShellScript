@@ -6,7 +6,7 @@
 #!/bin/bash
 
 ###Redesign for myself :)
-cd ~/MyGit/ShellScript/
+cd ~/ShellScript/
 eval "$(ssh-agent -s)"
 ssh-add
 commits=$(($RANDOM%20+1))
@@ -21,5 +21,5 @@ git add -A && git commit -m "$(($commitTimes+1))"
 i=$(($i+1))
 done
 git push origin master
-sudo pkill -8 ssh-agent
+pkill -8 ssh-agent
 cd ~
