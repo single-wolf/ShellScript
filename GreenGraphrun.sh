@@ -6,7 +6,9 @@
 #!/bin/bash
 
 ###Redesign for myself :)
-cd ~/ShellScript/
+DIR="$( cd "$( dirname "$0"  )" && pwd  )"
+cd ${DIR}
+echo "00 08 * * * ${DIR}/GreenGraprun.sh" |crontab -
 eval "$(ssh-agent -s)"
 ssh-add
 commits=$(($RANDOM%20+1))
