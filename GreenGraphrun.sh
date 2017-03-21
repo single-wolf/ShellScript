@@ -8,7 +8,7 @@
 ###Redesign for myself :)
 DIR="$( cd "$( dirname "$0"  )" && pwd  )"
 cd ${DIR}
-commits=$(($RANDOM%20+1))
+commits=8
 i=0
 while(($i<$commits))
 do
@@ -20,5 +20,5 @@ git add -A && git commit -m "$(($commitTimes+1))"
 i=$(($i+1))
 done
 git push origin master
-echo "SHELL=/bin/bash%00 00 * * * ${DIR}/GreenGraphrun.sh>>/home/zmvps/git.log 2>&1" |crontab -
+echo "00 00 * * * ${DIR}/GreenGraphrun.sh>>/home/zmvps/git.log 2>&1" |crontab -
 cd ~
