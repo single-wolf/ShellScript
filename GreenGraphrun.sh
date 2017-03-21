@@ -10,7 +10,7 @@
 DIR="$( cd "$( dirname "$0"  )" && pwd  )"
 PRO="$DIR/GreenGraphrun.sh"
 LOG="/home/zmvps/git.log"
-CMD="00 00 * * * $PRO>>$LOG 2>&1 &"
+CMD="00 00 * * * $PRO>>$LOG 2>&1"
 echo "$CMD"
 cd $DIR
 eval "$(ssh-agent -s)"
