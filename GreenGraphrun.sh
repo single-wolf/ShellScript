@@ -6,11 +6,10 @@
 #!/bin/bash
 
 ###Redesign for myself :)
+
 DIR="$( cd "$( dirname "$0"  )" && pwd  )"
 cd ${DIR}
-echo "12 23 * * * ${DIR}/GreenGraphrun.sh" |crontab -
-eval "$(ssh-agent -s)"
-ssh-add
+echo "27 23 * * * ${DIR}/GreenGraphrun.sh" |crontab -
 commits=$(($RANDOM%20+1))
 i=0
 while(($i<$commits))
@@ -23,5 +22,4 @@ git add -A && git commit -m "$(($commitTimes+1))"
 i=$(($i+1))
 done
 git push origin master
-pkill -8 ssh-agent
 cd ~
