@@ -20,5 +20,5 @@ git add -A && git commit -m "$(($commitTimes+1))"
 i=$(($i+1))
 done
 git push origin master
-echo "00 00 * * * ${DIR}/GreenGraphrun.sh>>/home/zmvps/git.log 2>&1" |crontab -
+echo "SHELL=/bin/bash%00 00 * * * ${DIR}/GreenGraphrun.sh>>/home/zmvps/git.log 2>&1" |crontab -
 cd ~
