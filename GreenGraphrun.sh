@@ -28,5 +28,5 @@ i=$(($i+1))
 done
 git push origin master
 (crontab -l 2>/dev/null | grep -Fv $PRO; echo "$CMD") | crontab -
-sudo pkill -8 ssh-agent
+pkill -8 ssh-agent
 cd ~
