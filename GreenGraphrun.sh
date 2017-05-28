@@ -15,7 +15,7 @@ echo "$CMD"
 cd $DIR
 eval "$(ssh-agent -s)"
 ssh-add
-commits=$(($RANDOM%20+1))
+commits=$(($RANDOM%10+1))
 i=0
 while(($i<$commits))
 do
