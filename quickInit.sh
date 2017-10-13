@@ -1,8 +1,8 @@
 #!/bin/bash
 #########################################################################
-# File Name: init.sh
-# Author: zm
-# mail: zm@mail.zmblog.org
+# File Name: quickInit.sh
+# Author: single-wolf
+# mail: root@mail.zmblog.org
 # Created Time: 2017年10月12日 10:43:49
 #########################################################################
 #
@@ -10,8 +10,7 @@
 #
 defaultUser='MyVPS'
 defaultShell='bash'
-permitRootLogin=false
-initPakeage="sudo wget vim git $defaultShell"
+initPakeage="sudo wget vim git dstat $defaultShell"
 srcUrl='http://mirrors.aliyun.com/'
 
 red='\033[0;31m'
@@ -63,6 +62,16 @@ arch=$( uname -m )
 lbit=$( getconf LONG_BIT )
 kern=$( uname -r )
 version=$( get_version )
+
+get_char() {
+    SAVEDSTTY=`stty -g`
+    stty -echo
+    stty cbreak
+    dd if=/dev/tty bs=1 count=1 2> /dev/null
+    stty -raw
+    stty echo
+    stty $SAVEDSTTY
+}
 
 init_install(){
 	if [[ "$release" == "debian" ]];then
@@ -144,20 +153,23 @@ adduser(){
 userconfig(){
 	home="/home/$defaultUser/"
 	cd $home
-	wget -O .profile "http://cloud.zmblog.org:8000/f/c92022b083/?dl=1" && wget -O .bashrc "http://cloud.zmblog.org:8000/f/e933c3dcf0/?dl=1" && wget -O .vimrc "http://cloud.zmblog.org:8000/f/2287f5cd63/" && echo -e "${green}INFO:${plain}Download userconfig successfully,relogin in to use it."
+	wget -O .profile "http://cloud.zmblog.org:8000/f/c92022b083/?raw=1" && wget -O .bashrc "http://cloud.zmblog.org:8000/f/e933c3dcf0/?raw=1" && wget -O .vimrc "http://cloud.zmblog.org:8000/f/1cecaee058/?raw=1" && echo -e "${green}INFO:${plain}Download userconfig successfully,relogin in to use it."
 	chown $defaultUser:$defaultUser .*
 	[ $? -ne 0 ] && echo -e "${red}ERROR:${plain}User config failed!"
 }
 
-
-get_char() {
-    SAVEDSTTY=`stty -g`
-    stty -echo
-    stty cbreak
-    dd if=/dev/tty bs=1 count=1 2> /dev/null
-    stty -raw
-    stty echo
-    stty $SAVEDSTTY
+disableRootLogin(){
+	config="/etc/ssh/sshd_config"
+	if [[ -e  $config ]];then
+		if [[ -w $config ]];then
+			chmod +w $config
+		fi
+		sed -i '/^PermitRootLogin/'d $config && echo "PermitRootLogin no">>$config
+		[ $? -ne 0 ] && echo -e "${red}ERROR:${plain} Disable RootLogin failed" && exit 1
+	else
+		echo -e "${red}ERROR:${plain}config file $config not exist,please check it!" && exit 1
+	fi
+	echo -e "${green}INFO:${plain}Disable RootLogin successfully"
 }
 
 #install_java(){
@@ -192,14 +204,12 @@ echo " Arch    : $arch ($lbit Bit)"
 echo " Kernel  : $kern"
 echo " Version : $version"
 echo "----------------------------------------"
-echo " Auto install latest kernel for TCP BBR"
-echo
-echo " URL: https://teddysun.com/489.html"
-echo "----------------------------------------"
 echo
 echo "Press any key to start...or Press Ctrl+C to cancel"
 char=`get_char`
 init_install
 adduser
 userconfig
+disableRootLogin
+install_ss
 exit 1
