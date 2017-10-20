@@ -78,7 +78,7 @@ init_install(){
 		file="/etc/apt/sources.list"
 		[[ ! -e $file ]] && echo -e "${red}ERROR:${plain}src file $file not exist,please check it!" && exit 1
 		cp $file "$file.`date +%F`"
-		echo "#Create By init.sh `date +%F`">$file
+		echo "#Created By quickInit.sh `date +%F`">$file
 		for kind in "deb" "deb-src";do
 			for sort in "" "-updates" ;do
 				echo "$kind $srcUrl$release $version$sort main contrib non-free" >> $file
@@ -95,10 +95,10 @@ init_install(){
 		file="/etc/apt/sources.list"
 		[[ ! -e $file ]] && echo -e "${red}ERROR:${plain}src file $file not exist,please check it!" && exit 1
 		cp $file "$file.`date +%F`"
-		echo "#Create By init.sh `date +%F`">$file
+		echo "#Created By quickInit.sh `date +%F`">$file
 		for kind in "deb" "deb-src";do
 			for sort in "" "-updates" "-security";do
-				for free in "main" "universe";do
+				for free in "main restricted" "universe" "multiverse";do
 					echo "$kind $srcUrl$release $version$sort $free" >> $file
 				done
 			done
@@ -212,4 +212,5 @@ adduser
 userconfig
 disableRootLogin
 install_ss
+install_bbr
 exit 1
