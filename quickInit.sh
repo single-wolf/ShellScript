@@ -8,7 +8,9 @@
 #
 #Auto init ECS or VPS include useradd ,install pakeage ,add sys-config
 #
-defaultUser='MyVPS'
+set -u 
+
+defaultUser='name'
 defaultShell='bash'
 initPakeage="sudo wget vim git dstat $defaultShell"
 srcUrl='http://mirrors.aliyun.com/'
@@ -18,7 +20,6 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-version_jdk=9
 
 [[ $EUID -ne 0 ]] && echo -e "${red}ERROR:${plain} This script must be run as root!" && exit 1
 
@@ -44,7 +45,7 @@ get_opsy() {
     [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
 }
 
-get_version(){
+get_version() {
 	if [[ "$release" == "centos" ]];then
 		[ -f /etc/os-release ] && awk -F'[="]+' '/VERSION_ID/{print $2}' /etc/os-release && return
 	elif [[ "$release" == "debian" ]];then
@@ -73,7 +74,10 @@ get_char() {
     stty $SAVEDSTTY
 }
 
-init_install(){
+init_install() {
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to install ${initPakeage}"
+	echo "-------------------"
 	if [[ "$release" == "debian" ]];then
 		file="/etc/apt/sources.list"
 		[[ ! -e $file ]] && echo -e "${red}ERROR:${plain}src file $file not exist,please check it!" && exit 1
@@ -110,16 +114,6 @@ init_install(){
 			exit 1
 		fi
 	elif [[ "$release" == "centos" ]];then
-		file="/etc/yum.repos.d/CentOS-Base.repo"
-		[[ ! -e $file ]] && echo -e "${red}ERROR:${plain}src file $file not exist,please check it!" && exit 1
-		cp $file "$file.`date +%F`"
-		if [[ ! -e "/usr/bin/wget" ]];then
-			wget -O $file "http://mirrors.aliyun.com/repo/Centos-$version.repo"
-		elif [[ -e "/usr/bin/curl" ]];then
-			curl -o $file "http://mirrors.aliyun.com/repo/Centos-$version.repo"
-		else 
-			yum -y install wget && wget -O $file "http://mirrors.aliyun.com/repo/Centos-$version.repo"
-		fi
 		yum clean all && yum makecache
 		yum -y install $initPakeage
 		if [[ $? -ne 0 ]];then
@@ -133,7 +127,10 @@ init_install(){
 	echo -e "${green}INFO:Init and install $initPakeage successfully."
 }
 
-adduser(){
+adduser() {
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to addUser ${defaultUser}"
+	echo "-------------------"
 	shell="/bin/$defaultShell"
 	useradd $defaultUser -m -s $shell
 	[ $? -ne 0 ] && echo -e "${red}ERROR:${plain} Add user $defaultUser failed,please check it" && exit 1
@@ -146,19 +143,32 @@ adduser(){
 	echo -e "${green}INFO:${plain}Add user $defaultUser successfully"
 	chmod +w /etc/sudoers
 	echo "$defaultUser	ALL=(ALL)	ALL" >> /etc/sudoers
-	[ $? -ne 0 ] && echo -e "${red}ERROR:${plain} Give user $defaultUser failed" && chmod -w /etc/sudoers && exit 1
+	[ $? -ne 0 ] && echo -e "${red}ERROR:${plain} Give user $defaultUser Rootright failed" && chmod -w /etc/sudoers && exit 1
 	chmod -w /etc/sudoers
 	echo -e "${green}INFO:${plain}Give user $defaultUser Rootright successfully"
 }
 userconfig(){
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to config user ${defaultUser}"
+	echo "-------------------"
 	home="/home/$defaultUser/"
 	cd $home
-	wget -O .profile "http://cloud.zmblog.org:8000/f/c92022b083/?raw=1" && wget -O .bashrc "http://cloud.zmblog.org:8000/f/e933c3dcf0/?raw=1" && wget -O .vimrc "http://cloud.zmblog.org:8000/f/1cecaee058/?raw=1" && echo -e "${green}INFO:${plain}Download userconfig successfully,relogin in to use it."
-	chown $defaultUser:$defaultUser .*
+	wget -O .profile "http://cloud.zmblog.org:8000/f/c92022b083/?raw=1" && \
+	wget -O .bashrc "http://cloud.zmblog.org:8000/f/e933c3dcf0/?raw=1" && \
+	git clone https://github.com/VundleVim/Vundle.vim.git $home/.vim/bundle/Vundle.vim && \
+	wget -O .vimrc "http://cloud.zmblog.org:8000/f/1cecaee058/?raw=1" && \
+	echo -e "${green}INFO:${plain}Download userconfig successfully" && \
+	echo -e "${yellow}INFO:${plain}Start to config Vim"
+	chown -R $defaultUser:$defaultUser $home && \
+	su -c "vim +PluginInstall +qa" $defaultUser && \
+	echo -e "${green}INFO:${plain}Config Successfully."
 	[ $? -ne 0 ] && echo -e "${red}ERROR:${plain}User config failed!"
 }
 
 disableRootLogin(){
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to disableRootLogin"
+	echo "-------------------"
 	config="/etc/ssh/sshd_config"
 	if [[ -e  $config ]];then
 		if [[ -w $config ]];then
@@ -172,26 +182,19 @@ disableRootLogin(){
 	echo -e "${green}INFO:${plain}Disable RootLogin successfully"
 }
 
-#install_java(){
-#	if [ -n `which java` ];then
-#		version_local=`java -version>version.tmp 2>&1 && awk -F'["]' '/java version/{print $2}' version.tmp && rm version.tmp`
-#		if [ $version_local -eq $version_jdk ];then
-#			echo -e "${green}INFO:${plain}JDK$version_jdk alreadly exists!"
-#			return
-#		else 
-#			echo -e "${yellow}INFO:${plain}Prepare to remove local JDK$version_local,and install JDK$version_jdk"
-#		fi
-#	else
-#	fi
-#}
-
 install_ss(){
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to install ss"
+	echo "-------------------"
 	wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
 	chmod +x shadowsocks-all.sh
 	./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log
 }
 
 install_bbr(){
+	echo "-------------------"
+	echo -e "${yellow}INFO:${plain}Start to install BBR"
+	echo "-------------------"
 	wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh
 	chmod +x bbr.sh
 	./bbr.sh
