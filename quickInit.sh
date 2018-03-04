@@ -192,14 +192,14 @@ install_jdk(){
 	echo "-------------------"
 	version_local=''
 	if [  -n `which java` ];then
-    	if [ `java -version 2>&1 |grep -E 'openjdk'` ];then
+    	if [ -n `java -version 2>&1 |grep -E 'openjdk'` ];then
     		version_local=`java -version 2>&1 |awk -F'["]' '/openjdk version/{print $2}'|awk -F'.' '{print $1}'`
 			from_local='OpenJDK'
     	else
     		version_local=`java -version 2>&1 |awk -F'["]' '/java version/{print $2}'|awk -F'.' '{print $1}'`
 			from_local='Oracle'
     	fi
-    	if [ $version_local -eq $version_jdk && $frm_jdk -eq $fromlocal ];then
+    	if [[ $version_local -eq $version_jdk && $frm_jdk -eq $fromlocal ]];then
     		echo -e "${green}[INFO]:${plain}${from_jdk} JDK$version_jdk already exists!"
 			return
 		fi
@@ -222,7 +222,7 @@ install_jdk(){
 			sudo apt-get update &&
 			sudo apt-get install openjdk-${version_jdk}-jdk
 		else if [[ "$release" == "centos" ]];then
-			echo 
+			echo
 		fi
 		fi
 	fi
@@ -241,7 +241,7 @@ install_jdk(){
 	echo 'JRE_HOME="$JAVA_HOME/jre"'|sudo tee /etc/environment &&
 	echo 'CLASSPATH=.:$JAVA_HOME/lib/:$JRE/lib/'|sudo tee /etc/environment &&
 	echo 'PATH="$PATH:$JAVA_HOME/bin"'|sudo tee /etc/environment &&
-	sudo source /etc/environment
+	source /etc/environment
 	if [[ $? -ne 0 ]];then
 			echo -e "${red}[ERROR]:${plain} Configure JDK environment failed, please check it."
 		exit 1
@@ -290,11 +290,11 @@ echo "----------------------------------------"
 echo
 echo "Press any key to start...or Press Ctrl+C to cancel"
 char=`get_char`
-#init_install
-#install_jdk
-#adduser
-#userconfig
-#disableRootLogin
-#install_ss
+init_install
+adduser
+userconfig
+disableRootLogin
+install_ss
+install_jdk
 #install_bbr
 exit 1
