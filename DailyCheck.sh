@@ -6,24 +6,27 @@
 # Created Time: Fri 02 Mar 2018 03:41:53 PM CST
 #########################################################################
 
-CheckLog="/home/zm/backup/SysCheck.log"
+#Log file cleaned if send mail successfully
+CheckLog="/home/user/backup/SysCheck.log"
 mailReceiver="root@mail.zmblog.org"
+#Mail subject
 subject="Daily Check Summary Mail"
-exceptIP="112.74.60.247"
+#Your IP that do not need to ban
+exceptIP=("112.74.60.247","127.0.0.1")
 date=`date`
 dateCut=${date:4:6}
 echo "${date} [INFO-Secure.sh] Start Secure Check ******************">> $CheckLog
 
 ###Check the mail.log
 
-echo "${date} [INFO-Mail] Summary of mail warning">> $CheckLog
+echo "${date} [INFO-Mail] Summary of mail banned IPs">> $CheckLog
 warningIP=`cat /var/log/mail.log /var/log/mail.log.1| \
 	grep "${dateCut}"|grep -E "(lost connection after (AUTH|EHLO|RCPT|STARTTLS)|authentication failed)"|\
 	grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"|\
 	uniq -c|tee -a ${CheckLog}|awk '{print $2}'`
 for ip in $warningIP;
 do
-	if [[ $ip != $exceptIP ]];then
+	if [[ "${exceptIP[@]/$ip/}" = "${exceptIP[@]}" ]];then
 		iptables -A INPUT -s $ip -j DROP
 	fi
 done
